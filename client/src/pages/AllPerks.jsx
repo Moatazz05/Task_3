@@ -81,6 +81,24 @@ export default function AllPerks() {
     }
   }
 
+  // Initial load: fetch all perks on component mount
+  useEffect(() => {
+    loadAllPerks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-search: when searchQuery or merchantFilter changes, debounce and load
+  useEffect(() => {
+    // Debounce timer id
+    const id = setTimeout(() => {
+      loadAllPerks()
+    }, 450) // 450ms debounce
+
+    return () => clearTimeout(id)
+    // Intentionally not including loadAllPerks in deps to avoid redefining
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, merchantFilter])
+
   // ==================== EVENT HANDLERS ====================
 
   
@@ -136,7 +154,8 @@ export default function AllPerks() {
                 type="text"
                 className="input"
                 placeholder="Enter perk name..."
-                
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
               />
               <p className="text-xs text-zinc-500 mt-1">
                 Auto-searches as you type, or press Enter / click Search
@@ -151,7 +170,8 @@ export default function AllPerks() {
               </label>
               <select
                 className="input"
-                
+                value={merchantFilter}
+                onChange={e => setMerchantFilter(e.target.value)}
               >
                 <option value="">All Merchants</option>
                 
@@ -216,10 +236,10 @@ export default function AllPerks() {
         {perks.map(perk => (
           
           <Link
-            key={perk._id}
-           
-            className="card hover:shadow-lg transition-shadow cursor-pointer"
-          >
+              key={perk._id}
+              to={`/perks/${perk._id}`}
+              className="card hover:shadow-lg transition-shadow cursor-pointer"
+            >
             {/* Perk Title */}
             <div className="font-semibold text-lg text-zinc-900 mb-2">
               {perk.title}
